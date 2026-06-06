@@ -53,6 +53,7 @@ class MockPMS(PMS):
         return out
 
     # --- interface (Contract 3) ------------------------------------------
+    # Find an existing patient by name + date of birth (case-insensitive).
     def find_patient(self, first_name: str, last_name: str, dob: str) -> Optional[Patient]:
         for p in self.patients.values():
             if (p.first_name.lower() == first_name.lower()
@@ -62,6 +63,7 @@ class MockPMS(PMS):
                 return p
         return None
 
+    # Register a brand-new patient.
     def create_patient(self, first_name: str, last_name: str, dob: str, phone: str) -> Patient:
         pid = f"pat_{next(self._next_pid)}"
         patient = Patient(id=pid, first_name=first_name, last_name=last_name,
@@ -69,12 +71,14 @@ class MockPMS(PMS):
         self.patients[pid] = patient
         return patient
 
+    # Ask the slot engine for free times, given everything currently booked.
     def get_available_slots(self, treatment_key: str, practitioner_id: Optional[str],
                             date_from: str, date_to: str) -> List[Slot]:
         booked = [a.to_dict() for a in self._booked()]
         return compute_free_slots(self.config, treatment_key, practitioner_id,
                                   date_from, date_to, booked, now=self.now)
 
+    # Book an appointment, guarding against two callers grabbing the same slot.
     def create_appointment(self, patient_id: str, treatment_key: str,
                            practitioner_id: str, start: str) -> dict:
         treatment = self._treatment(treatment_key)
@@ -99,6 +103,7 @@ class MockPMS(PMS):
         self.appt_owner[aid] = patient_id
         return {"status": "booked", "appointment": appt.to_dict()}
 
+    # Cancel an appointment by id (marks it cancelled so its slot frees up again).
     def cancel_appointment(self, appointment_id: str) -> dict:
         appt = self.appointments.get(appointment_id)
         if appt is None or appt.status != "booked":
