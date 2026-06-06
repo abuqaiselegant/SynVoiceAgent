@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "tenant_id": "00000000-0000-0000-0000-0000000000d1",
+  "domain": "dental",
+  "booking_system": "mock",
+
+  "business": {
+    "name": "Bright Smiles Dental",
+    "timezone": "Europe/London",
+    "phone": "+441162345678",
+    "address": "12 High Street, Leicester, LE1 4AB",
+    "location_notes": "Free parking on Mill Lane, a 2 minute walk."
+  },
+
+  "opening_hours": {
+    "monday":    { "open": "09:00", "close": "17:30", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+    "tuesday":   { "open": "09:00", "close": "17:30", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+    "wednesday": { "open": "09:00", "close": "17:30", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+    "thursday":  { "open": "09:00", "close": "19:00", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+    "friday":    { "open": "09:00", "close": "16:00", "breaks": [] },
+    "saturday":  { "open": "09:00", "close": "13:00", "breaks": [] },
+    "sunday":    null
+  },
+
+  "resources": [
+    {
+      "id": "res_101",
+      "name": "Dr. Jane Smith",
+      "label": "Dentist",
+      "service_keys": ["exam", "filling", "emergency"],
+      "capacity": 1,
+      "working_hours": {
+        "monday":    { "open": "09:00", "close": "17:00", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+        "tuesday":   null,
+        "wednesday": { "open": "09:00", "close": "17:00", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+        "thursday":  { "open": "09:00", "close": "19:00", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+        "friday":    { "open": "09:00", "close": "16:00", "breaks": [] },
+        "saturday":  null,
+        "sunday":    null
+      }
+    },
+    {
+      "id": "res_102",
+      "name": "Aisha Khan",
+      "label": "Hygienist",
+      "service_keys": ["scale_polish"],
+      "capacity": 1
+    }
+  ],
+
+  "services": [
+    { "key": "exam",         "name": "Examination",          "duration_minutes": 20, "booking_system_ref": "examination",     "price": { "display": "£25.80", "notes": "NHS Band 1" }, "attributes": { "funding": "nhs" } },
+    { "key": "scale_polish", "name": "Scale & Polish",        "duration_minutes": 30, "booking_system_ref": "scale_and_polish", "price": { "display": "£60.00", "notes": "Private hygiene" }, "attributes": { "funding": "private" } },
+    { "key": "filling",      "name": "Filling",              "duration_minutes": 40, "booking_system_ref": "filling",         "price": { "display": "£70.70", "notes": "NHS Band 2" } },
+    { "key": "emergency",    "name": "Emergency Appointment", "duration_minutes": 20, "booking_system_ref": "emergency",       "deposit": { "required": true, "amount_pence": 3000 } }
+  ],
+
+  "customer_identity": ["last_name", "dob"],
+
+  "booking_fields": [
+    { "key": "dob", "label": "date of birth", "type": "date", "required": true }
+  ],
+
+  "booking_system_config": {
+    "rooms": [ { "id": "room_1", "name": "Surgery 1" }, { "id": "room_2", "name": "Surgery 2" } ],
+    "payment_plans": [ { "id": "pp_nhs", "name": "NHS" }, { "id": "pp_private", "name": "Private" } ]
+  },
+
+  "faq": [
+    { "key": "parking", "question": "Is there parking?",        "answer": "Yes, free parking on Mill Lane, a 2 minute walk." },
+    { "key": "nhs",     "question": "Do you take NHS patients?", "answer": "Yes, for exams, fillings and emergencies." }
+  ],
+
+  "escalation": {
+    "transfer_number": "+441162345679",
+    "always_escalate": ["emergency", "complaint"],
+    "take_message_when_unreachable": true
+  },
+
+  "sms": {
+    "sender_name": "BrightSmile",
+    "templates": {
+      "booking_confirmation": "Hi {{customer_name}}, your {{service}} with {{resource}} is booked for {{date}} at {{time}}. Bright Smiles Dental.",
+      "cancellation": "Hi {{customer_name}}, your appointment on {{date}} at {{time}} has been cancelled. Please call us to rebook.",
+      "reschedule": "Hi {{customer_name}}, your appointment has moved to {{date}} at {{time}}. Bright Smiles Dental."
+    }
+  }
+}

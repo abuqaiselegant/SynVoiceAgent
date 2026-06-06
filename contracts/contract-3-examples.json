@@ -1,0 +1,45 @@
+{
+  "Patient": {
+    "id": "pat_999",
+    "first_name": "John",
+    "last_name": "Doe",
+    "dob": "1985-03-22",
+    "phone": "+447700900123",
+    "upcoming": [
+      {
+        "id": "appt_555",
+        "start": "2026-06-10T14:00:00+01:00",
+        "end": "2026-06-10T14:20:00+01:00",
+        "treatment_key": "exam",
+        "treatment_name": "Examination",
+        "practitioner_id": "dentally_practitioner_101",
+        "practitioner_name": "Dr. Jane Smith",
+        "status": "booked"
+      }
+    ]
+  },
+
+  "Slot": {
+    "start": "2026-06-10T14:00:00+01:00",
+    "practitioner_id": "dentally_practitioner_101",
+    "practitioner_name": "Dr. Jane Smith"
+  },
+
+  "CreateResult_booked": {
+    "status": "booked",
+    "appointment": {
+      "id": "appt_555",
+      "start": "2026-06-10T14:00:00+01:00",
+      "end": "2026-06-10T14:20:00+01:00",
+      "treatment_key": "exam",
+      "treatment_name": "Examination",
+      "practitioner_id": "dentally_practitioner_101",
+      "practitioner_name": "Dr. Jane Smith",
+      "status": "booked"
+    }
+  },
+
+  "CreateResult_slot_taken": { "status": "slot_taken" },
+
+  "CancelResult": { "status": "cancelled" }
+}

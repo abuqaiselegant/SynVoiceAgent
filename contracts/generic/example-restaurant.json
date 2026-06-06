@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "tenant_id": "00000000-0000-0000-0000-0000000000r1",
+  "domain": "restaurant",
+  "booking_system": "mock",
+
+  "business": {
+    "name": "The Olive Tree",
+    "timezone": "Europe/London",
+    "phone": "+441159876543",
+    "address": "5 Market Square, Nottingham, NG1 2DP",
+    "location_notes": "Nearest car park is Trinity Square, 3 minutes away."
+  },
+
+  "opening_hours": {
+    "monday":    null,
+    "tuesday":   { "open": "12:00", "close": "22:00", "breaks": [ { "start": "15:00", "end": "17:00" } ] },
+    "wednesday": { "open": "12:00", "close": "22:00", "breaks": [ { "start": "15:00", "end": "17:00" } ] },
+    "thursday":  { "open": "12:00", "close": "22:00", "breaks": [ { "start": "15:00", "end": "17:00" } ] },
+    "friday":    { "open": "12:00", "close": "23:00", "breaks": [ { "start": "15:00", "end": "17:00" } ] },
+    "saturday":  { "open": "12:00", "close": "23:00", "breaks": [] },
+    "sunday":    { "open": "12:00", "close": "20:00", "breaks": [] }
+  },
+
+  "resources": [
+    { "id": "table_2a", "name": "Table 2", "label": "Window table", "service_keys": ["lunch", "dinner"], "capacity": 2 },
+    { "id": "table_4a", "name": "Table 4", "label": "Indoor table", "service_keys": ["lunch", "dinner"], "capacity": 4 },
+    { "id": "table_6a", "name": "Table 6", "label": "Patio table",  "service_keys": ["lunch", "dinner"], "capacity": 6 }
+  ],
+
+  "services": [
+    { "key": "lunch",  "name": "Lunch reservation",  "duration_minutes": 60, "booking_system_ref": "lunch" },
+    { "key": "dinner", "name": "Dinner reservation", "duration_minutes": 90, "booking_system_ref": "dinner" }
+  ],
+
+  "customer_identity": ["phone"],
+
+  "booking_fields": [
+    { "key": "party_size",  "label": "number of guests",      "type": "number", "required": true },
+    { "key": "dietary_note", "label": "dietary requirements", "type": "text",   "required": false }
+  ],
+
+  "faq": [
+    { "key": "parking",  "question": "Where can I park?",       "answer": "Trinity Square car park is a 3 minute walk away." },
+    { "key": "dietary",  "question": "Do you cater for vegans?", "answer": "Yes, we have a full vegan menu — just let us know when you book." }
+  ],
+
+  "escalation": {
+    "transfer_number": "+441159876544",
+    "always_escalate": ["large_party", "complaint"],
+    "take_message_when_unreachable": true
+  },
+
+  "sms": {
+    "sender_name": "OliveTree",
+    "templates": {
+      "booking_confirmation": "Hi {{customer_name}}, your table is booked for {{date}} at {{time}}. We look forward to seeing you at The Olive Tree.",
+      "cancellation": "Hi {{customer_name}}, your reservation on {{date}} at {{time}} has been cancelled.",
+      "reschedule": "Hi {{customer_name}}, your reservation is now {{date}} at {{time}}. The Olive Tree."
+    }
+  }
+}

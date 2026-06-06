@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "tenant_id": "00000000-0000-0000-0000-0000000000m1",
+  "domain": "mechanic",
+  "booking_system": "mock",
+
+  "business": {
+    "name": "QuickFix Garage",
+    "timezone": "Europe/London",
+    "phone": "+441162223344",
+    "address": "40 Station Road, Leicester, LE2 7HJ",
+    "location_notes": "Around the back of the petrol station; customer parking on the left."
+  },
+
+  "opening_hours": {
+    "monday":    { "open": "08:00", "close": "18:00", "breaks": [ { "start": "12:30", "end": "13:00" } ] },
+    "tuesday":   { "open": "08:00", "close": "18:00", "breaks": [ { "start": "12:30", "end": "13:00" } ] },
+    "wednesday": { "open": "08:00", "close": "18:00", "breaks": [ { "start": "12:30", "end": "13:00" } ] },
+    "thursday":  { "open": "08:00", "close": "18:00", "breaks": [ { "start": "12:30", "end": "13:00" } ] },
+    "friday":    { "open": "08:00", "close": "18:00", "breaks": [ { "start": "12:30", "end": "13:00" } ] },
+    "saturday":  { "open": "09:00", "close": "13:00", "breaks": [] },
+    "sunday":    null
+  },
+
+  "resources": [
+    { "id": "bay_1", "name": "Bay 1", "label": "Service bay", "service_keys": ["mot", "oil_change", "brake_check"], "capacity": 1 },
+    { "id": "bay_2", "name": "Bay 2", "label": "Service bay", "service_keys": ["oil_change", "brake_check"],        "capacity": 1 }
+  ],
+
+  "services": [
+    { "key": "mot",         "name": "MOT test",     "duration_minutes": 45, "booking_system_ref": "mot",         "price": { "display": "£54.85", "notes": "Standard MOT" } },
+    { "key": "oil_change",  "name": "Oil change",   "duration_minutes": 30, "booking_system_ref": "oil_change",  "price": { "display": "£49.00" } },
+    { "key": "brake_check", "name": "Brake check",  "duration_minutes": 30, "booking_system_ref": "brake_check", "price": { "display": "Free" } }
+  ],
+
+  "customer_identity": ["last_name", "phone"],
+
+  "booking_fields": [
+    { "key": "vehicle_reg",  "label": "vehicle registration", "type": "text", "required": true },
+    { "key": "vehicle_make", "label": "vehicle make and model", "type": "text", "required": false }
+  ],
+
+  "faq": [
+    { "key": "wait",   "question": "Can I wait while it's done?", "answer": "Yes, we have a waiting area with free coffee for short jobs like an MOT." },
+    { "key": "courtesy", "question": "Do you offer a courtesy car?", "answer": "We have two courtesy cars — ask when you book and we'll check availability." }
+  ],
+
+  "escalation": {
+    "transfer_number": "+441162223345",
+    "always_escalate": ["breakdown", "complaint"],
+    "take_message_when_unreachable": true
+  },
+
+  "sms": {
+    "sender_name": "QuickFix",
+    "templates": {
+      "booking_confirmation": "Hi {{customer_name}}, your {{service}} is booked for {{date}} at {{time}} at QuickFix Garage.",
+      "cancellation": "Hi {{customer_name}}, your {{service}} on {{date}} at {{time}} has been cancelled. Call us to rebook.",
+      "reschedule": "Hi {{customer_name}}, your {{service}} has moved to {{date}} at {{time}}. QuickFix Garage."
+    }
+  }
+}

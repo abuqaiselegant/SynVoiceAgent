@@ -1,0 +1,90 @@
+{
+  "check_availability": {
+    "request": {
+      "call_id": "retell_abc123",
+      "to_number": "+441162345678",
+      "from_number": "+447700900123",
+      "function": "check_availability",
+      "args": {
+        "treatment_key": "exam",
+        "practitioner_id": null,
+        "date_from": "2026-06-10",
+        "date_to": "2026-06-14"
+      }
+    },
+    "response": {
+      "status": "ok",
+      "slots": [
+        { "start": "2026-06-10T14:00:00+01:00", "practitioner_id": "dentally_practitioner_101", "practitioner_name": "Dr. Jane Smith" },
+        { "start": "2026-06-10T15:30:00+01:00", "practitioner_id": "dentally_practitioner_101", "practitioner_name": "Dr. Jane Smith" }
+      ]
+    }
+  },
+
+  "book_appointment": {
+    "request": {
+      "call_id": "retell_abc123",
+      "to_number": "+441162345678",
+      "from_number": "+447700900123",
+      "function": "book_appointment",
+      "args": {
+        "patient": { "first_name": "John", "last_name": "Doe", "dob": "1985-03-22", "phone": "+447700900123" },
+        "treatment_key": "exam",
+        "practitioner_id": "dentally_practitioner_101",
+        "start": "2026-06-10T14:00:00+01:00"
+      }
+    },
+    "response": {
+      "status": "booked",
+      "appointment_id": "appt_555",
+      "message": "You're booked in."
+    }
+  },
+
+  "lookup_patient": {
+    "request": {
+      "call_id": "retell_abc123",
+      "to_number": "+441162345678",
+      "from_number": "+447700900123",
+      "function": "lookup_patient",
+      "args": { "first_name": "John", "last_name": "Doe", "dob": "1985-03-22" }
+    },
+    "response": {
+      "status": "found",
+      "patient_id": "pat_999",
+      "upcoming": [
+        { "appointment_id": "appt_555", "start": "2026-06-10T14:00:00+01:00", "treatment": "Examination", "practitioner_name": "Dr. Jane Smith" }
+      ]
+    }
+  },
+
+  "cancel_appointment": {
+    "request": {
+      "call_id": "retell_abc123",
+      "to_number": "+441162345678",
+      "from_number": "+447700900123",
+      "function": "cancel_appointment",
+      "args": { "appointment_id": "appt_555" }
+    },
+    "response": { "status": "cancelled", "message": "That's cancelled for you." }
+  },
+
+  "reschedule_appointment": {
+    "request": {
+      "call_id": "retell_abc123",
+      "to_number": "+441162345678",
+      "from_number": "+447700900123",
+      "function": "reschedule_appointment",
+      "args": {
+        "appointment_id": "appt_555",
+        "new_start": "2026-06-12T11:00:00+01:00",
+        "practitioner_id": "dentally_practitioner_101"
+      }
+    },
+    "response": {
+      "status": "rescheduled",
+      "appointment_id": "appt_777",
+      "message": "Moved to Friday at 11."
+    }
+  }
+}
