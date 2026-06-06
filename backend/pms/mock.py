@@ -110,3 +110,37 @@ class MockPMS(PMS):
             return {"status": "not_found"}
         appt.status = "cancelled"
         return {"status": "cancelled"}
+
+    # Move an appointment to a new time. Checks the new slot first; if it's taken we keep the
+    # original untouched. Otherwise we cancel the old one and create the new one (same patient +
+    # treatment, optionally a different practitioner).
+    def reschedule_appointment(self, appointment_id: str, new_start: str,
+                               practitioner_id: Optional[str] = None) -> dict:
+        appt = self.appointments.get(appointment_id)
+        if appt is None or appt.status != "booked":
+            return {"status": "not_found"}
+
+        patient_id = self.appt_owner.get(appointment_id)
+        treatment = self._treatment(appt.treatment_key)
+        target_practitioner = practitioner_id or appt.practitioner_id
+        practitioner = self._practitioner(target_practitioner)
+        start_dt = datetime.fromisoformat(new_start)
+        end_dt = start_dt + timedelta(minutes=treatment["duration_minutes"])
+
+        # Re-check the new slot, ignoring the very appointment we're moving.
+        for a in self._booked():
+            if a.id == appointment_id or a.practitioner_id != target_practitioner:
+                continue
+            if _overlaps(start_dt, end_dt, datetime.fromisoformat(a.start),
+                         datetime.fromisoformat(a.end)):
+                return {"status": "slot_taken"}   # original booking left intact
+
+        appt.status = "cancelled"                  # release the old time
+        aid = f"appt_{next(self._next_aid)}"
+        new_appt = Appointment(id=aid, start=start_dt.isoformat(), end=end_dt.isoformat(),
+                               treatment_key=appt.treatment_key, treatment_name=treatment["name"],
+                               practitioner_id=target_practitioner,
+                               practitioner_name=practitioner["name"], status="booked")
+        self.appointments[aid] = new_appt
+        self.appt_owner[aid] = patient_id
+        return {"status": "rescheduled", "appointment": new_appt.to_dict()}

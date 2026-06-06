@@ -28,8 +28,10 @@ PMS interface (these functions)
    implementation. The handlers must work unchanged across Mock, Cliniko, and Dentally.
 3. **The booking path never lies.** `create_appointment` re-checks at write time and returns
    `slot_taken` on a race. A success result means the write actually happened. No optimistic confirms.
-4. **Reschedule is not a PMS function.** The webhook reschedule handler composes
-   `cancel_appointment` + `create_appointment`. Keeps the interface minimal.
+4. **Reschedule is a PMS function.** It needs the original appointment's patient + treatment (which
+   the handler doesn't have) and must cancel-then-rebook atomically — keeping the original if the new
+   slot is taken. So the PMS owns it rather than the handler composing cancel + create.
+   *(Revised 2026-06-07: originally handler-composed; moved into the PMS during webhook build.)*
 5. **Return shapes match Contract 2's needs.** `Slot`, `Appointment`, `CreateResult` carry exactly
    the fields the webhook responses need, so handlers mostly pass shapes through.
 6. **Times are ISO 8601 with offset**, in the practice's timezone.
@@ -61,6 +63,13 @@ taken since it was offered. Never confirms a booking that didn't write.
 
 ### `cancel_appointment(appointment_id)` → `{ "status": "cancelled" | "not_found" }`
 Cancel an appointment by id.
+
+### `reschedule_appointment(appointment_id, new_start, practitioner_id?)` → `CreateResult`
+Move an existing appointment to a new time (same patient + treatment; optionally a different
+practitioner). Re-checks the new slot first: if it's taken, returns `{ "status": "slot_taken" }`
+and **leaves the original booking intact**. Otherwise cancels the original and creates the new one,
+returning `{ "status": "rescheduled", "appointment": {...} }`, or `{ "status": "not_found" }` if the
+original appointment doesn't exist.
 
 ---
 

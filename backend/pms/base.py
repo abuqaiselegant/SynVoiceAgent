@@ -29,3 +29,9 @@ class PMS(ABC):
     @abstractmethod
     def cancel_appointment(self, appointment_id: str) -> dict:
         """-> {"status": "cancelled"} or {"status": "not_found"}."""
+
+    @abstractmethod
+    def reschedule_appointment(self, appointment_id: str, new_start: str,
+                               practitioner_id: Optional[str] = None) -> dict:
+        """Move an appointment. -> {"status": "rescheduled", "appointment": {...}},
+        {"status": "slot_taken"} (original kept), or {"status": "not_found"}."""
