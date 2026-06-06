@@ -4,7 +4,9 @@ One real endpoint: POST /webhook. It reads the Contract 2 envelope, finds which 
 is for (by the dialled number), and routes the function to the right handler. Plus GET /health for
 a quick "is it up?" check.
 
-Run locally:  uvicorn app:app --reload   (from the backend/ directory)
+Run locally (port 8080 — 8000 is used by another local app):
+    python3 app.py
+    # or: uvicorn app:app --reload --port 8080   (from the backend/ directory)
 """
 
 import os
@@ -37,3 +39,9 @@ async def webhook(request: Request):
 
     config, pms = tenant
     return dispatch(pms, body.get("function"), body.get("args") or {})
+
+
+# Pinned to 8080 so we never collide with the AskMyDocs app on 8000.
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app:app", host="127.0.0.1", port=8080, reload=True)
