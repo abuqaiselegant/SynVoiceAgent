@@ -19,7 +19,7 @@ sys.path.insert(0, HERE)
 from pms.mock import MockPMS   # noqa: E402
 from handlers import dispatch  # noqa: E402
 
-CONFIG = json.load(open(os.path.join(HERE, "..", "contracts", "contract-1-example.json")))
+CONFIG = json.load(open(os.path.join(HERE, "seed_config.json")))
 TZ = ZoneInfo(CONFIG["practice"]["timezone"])
 JANE = "dentally_practitioner_101"
 

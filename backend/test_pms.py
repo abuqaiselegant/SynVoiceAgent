@@ -16,7 +16,7 @@ sys.path.insert(0, HERE)
 from pms.mock import MockPMS               # noqa: E402
 from pms.slots import compute_free_slots   # noqa: E402
 
-CONFIG = json.load(open(os.path.join(HERE, "..", "contracts", "contract-1-example.json")))
+CONFIG = json.load(open(os.path.join(HERE, "seed_config.json")))
 TZ = ZoneInfo(CONFIG["practice"]["timezone"])
 
 JANE = "dentally_practitioner_101"   # Dentist: exam, scale_polish, filling, emergency. Mon/Wed/Thu/Fri

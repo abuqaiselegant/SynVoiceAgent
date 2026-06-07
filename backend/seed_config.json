@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "tenant_id": "00000000-0000-0000-0000-000000000001",
+  "pms": "mock",
+
+  "practice": {
+    "name": "Bright Smiles Dental",
+    "timezone": "Europe/London",
+    "phone": "+441162345678",
+    "address": "12 High Street, Leicester, LE1 4AB",
+    "location_notes": "Free parking on Mill Lane, a 2 minute walk from the practice."
+  },
+
+  "opening_hours": {
+    "monday":    { "open": "09:00", "close": "17:30", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+    "tuesday":   { "open": "09:00", "close": "17:30", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+    "wednesday": { "open": "09:00", "close": "17:30", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+    "thursday":  { "open": "09:00", "close": "19:00", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+    "friday":    { "open": "09:00", "close": "16:00", "breaks": [] },
+    "saturday":  { "open": "09:00", "close": "13:00", "breaks": [] },
+    "sunday":    null
+  },
+
+  "practitioners": [
+    {
+      "id": "dentally_practitioner_101",
+      "name": "Dr. Jane Smith",
+      "role": "Dentist",
+      "treatment_keys": ["exam", "scale_polish", "filling", "emergency"],
+      "working_hours": {
+        "monday":    { "open": "09:00", "close": "17:00", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+        "tuesday":   null,
+        "wednesday": { "open": "09:00", "close": "17:00", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+        "thursday":  { "open": "09:00", "close": "19:00", "breaks": [ { "start": "13:00", "end": "14:00" } ] },
+        "friday":    { "open": "09:00", "close": "16:00", "breaks": [] },
+        "saturday":  null,
+        "sunday":    null
+      }
+    },
+    {
+      "id": "dentally_practitioner_102",
+      "name": "Aisha Khan",
+      "role": "Hygienist",
+      "treatment_keys": ["scale_polish"],
+      "working_hours": {
+        "monday":    null,
+        "tuesday":   { "open": "09:00", "close": "17:00", "breaks": [ { "start": "12:30", "end": "13:30" } ] },
+        "wednesday": null,
+        "thursday":  { "open": "09:00", "close": "17:00", "breaks": [ { "start": "12:30", "end": "13:30" } ] },
+        "friday":    { "open": "09:00", "close": "15:00", "breaks": [] },
+        "saturday":  { "open": "09:00", "close": "13:00", "breaks": [] },
+        "sunday":    null
+      }
+    }
+  ],
+
+  "treatment_types": [
+    { "key": "exam",         "name": "Examination",          "duration_minutes": 20, "funding": "both",    "pms_reason": "examination",     "price": { "display": "£25.80", "notes": "NHS Band 1" } },
+    { "key": "scale_polish", "name": "Scale & Polish",        "duration_minutes": 30, "funding": "private", "pms_reason": "scale_and_polish", "price": { "display": "£60.00", "notes": "Private hygiene appointment" } },
+    { "key": "filling",      "name": "Filling",              "duration_minutes": 40, "funding": "both",    "pms_reason": "filling",         "price": { "display": "£70.70", "notes": "NHS Band 2" } },
+    { "key": "emergency",    "name": "Emergency Appointment", "duration_minutes": 20, "funding": "both",    "pms_reason": "emergency",       "deposit": { "required": true, "amount_pence": 3000 }, "price": { "display": "£30.00 deposit", "notes": "Deposit redeemed against treatment" } }
+  ],
+
+  "rooms": [
+    { "id": "dentally_room_1", "name": "Surgery 1" },
+    { "id": "dentally_room_2", "name": "Surgery 2" }
+  ],
+
+  "payment_plans": [
+    { "id": "dentally_pp_nhs", "name": "NHS" },
+    { "id": "dentally_pp_private", "name": "Private" }
+  ],
+
+  "faq": [
+    { "key": "parking",  "question": "Is there parking?",            "answer": "Yes, there's free parking on Mill Lane, just a 2 minute walk from us." },
+    { "key": "opening",  "question": "What are your opening hours?",  "answer": "We're open Monday to Thursday 9 to 5:30, Friday 9 to 4, and Saturday mornings 9 to 1." },
+    { "key": "location", "question": "Where are you?",               "answer": "We're at 12 High Street, Leicester, LE1 4AB." },
+    { "key": "nhs",      "question": "Do you take NHS patients?",     "answer": "Yes, we accept NHS patients for exams, fillings and emergencies." }
+  ],
+
+  "escalation": {
+    "transfer_number": "+441162345679",
+    "always_escalate": ["emergency", "safeguarding", "complaint"],
+    "take_message_when_unreachable": true
+  },
+
+  "sms": {
+    "sender_name": "BrightSmile",
+    "templates": {
+      "booking_confirmation": "Hi {{patient_name}}, your {{treatment}} with {{practitioner}} is booked for {{date}} at {{time}}. Bright Smiles Dental.",
+      "cancellation": "Hi {{patient_name}}, your appointment on {{date}} at {{time}} has been cancelled. Please call us to rebook. Bright Smiles Dental.",
+      "reschedule": "Hi {{patient_name}}, your appointment has moved to {{date}} at {{time}}. Bright Smiles Dental."
+    }
+  },
+
+  "retention": {
+    "recordings_days": 30,
+    "transcripts_days": 90,
+    "call_logs_days": 365
+  }
+}
