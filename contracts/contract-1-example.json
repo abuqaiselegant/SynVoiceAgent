@@ -120,5 +120,11 @@
       "cancellation": "Hi {{patient_name}}, your appointment on {{date}} at {{time}} has been cancelled. Please call us to rebook. Bright Smiles Dental.",
       "reschedule": "Hi {{patient_name}}, your appointment has moved to {{date}} at {{time}}. Bright Smiles Dental."
     }
+  },
+
+  "retention": {
+    "recordings_days": 30,
+    "transcripts_days": 90,
+    "call_logs_days": 365
   }
 }

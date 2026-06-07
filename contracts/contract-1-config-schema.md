@@ -41,7 +41,8 @@ slot engine, and out-of-hours check all read it.
   "payment_plans":   [ ... ],     // PMS payment-plan ids (Dentally). Cliniko may leave empty.
   "faq":             [ ... ],     // static Q&A the agent answers
   "escalation":      { ... },     // when & where to hand off to a human
-  "sms":             { ... }      // sender name + message templates
+  "sms":             { ... },     // sender name + message templates
+  "retention":       { ... }      // optional. how long we keep call data before auto-delete
 }
 ```
 
@@ -168,6 +169,21 @@ Static answers the agent reads. Order is the priority order.
 ```
 - Placeholders use `{{snake_case}}`. Available: `patient_name`, `treatment`, `practitioner`,
   `date`, `time`, `practice_name`. Unknown placeholders render literally (and are a config bug).
+
+### `retention` (optional — compliance)
+How many days we keep each kind of call data before it is **auto-deleted**. Driven by GDPR
+data-minimisation (see `COMPLIANCE.md` §3.2). Omitted = system defaults. Numbers are agreed with
+the practice. A scheduled delete job (built later) removes anything older than these — which
+satisfies both the Retention Policy and the right-to-erasure requirement.
+```jsonc
+{
+  "recordings_days": 30,     // int. delete call audio recordings after N days
+  "transcripts_days": 90,    // int. delete call transcripts after N days
+  "call_logs_days": 365      // int. delete call metadata / logs after N days
+}
+```
+- We store **only references** to the patient (tenant id + PMS patient id), never a second copy of
+  the patient record — so retention here covers call data, not patient records (those live in the PMS).
 
 ---
 
