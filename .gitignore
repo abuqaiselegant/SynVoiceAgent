@@ -20,3 +20,6 @@ env/
 CLAUDE.md
 BUILD_LOG.md
 PROJECT_PLAN.md
+
+# Handoff doc holds a live secret — keep local only
+HANDOFF-B-webhook.md
