@@ -79,9 +79,9 @@ async def _handle(request: Request, path_function=None):
         # in our own curls/envelope it comes from "function"/"name".
         function = path_function or body.get("function") or body.get("name")
         return dispatch(pms, function, body.get("args") or {})
-    except Exception as e:
-        traceback.print_exc()
-        return {"status": "error", "message": f"server error: {type(e).__name__}: {e}"}
+    except Exception:
+        traceback.print_exc()   # full detail in the server logs, not in the response
+        return {"status": "error", "message": "Sorry, something went wrong on our side."}
 
 
 @app.post("/webhook")
