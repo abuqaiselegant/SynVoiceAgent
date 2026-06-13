@@ -12,6 +12,7 @@ Run locally (port 8080 — 8000 is used by another local app):
 import hmac
 import os
 import sys
+import traceback
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -64,17 +65,23 @@ async def _handle(request: Request, path_function=None):
 
     # Which practice is this call for? Identified by the number that was dialled.
     to_number = _extract_to_number(body)
-    tenant = get_tenant(to_number)
-    if tenant is None:
-        return {"status": "error",
-                "message": f"unknown practice for number {to_number}"}
+    # Resolving the tenant builds its PMS (which may reach Supabase / Google). Never let a misconfig
+    # 500 the whole endpoint — return a clean error the agent can fall back on.
+    try:
+        tenant = get_tenant(to_number)
+        if tenant is None:
+            return {"status": "error",
+                    "message": f"unknown practice for number {to_number}"}
 
-    config, pms = tenant
-    # Function identity, most reliable first: the URL path (/webhook/<fn>), then the body. Retell's
-    # test dialog overwrites the body's name with "test_tool", so the path is what makes it routable;
-    # in our own curls/envelope it comes from "function"/"name".
-    function = path_function or body.get("function") or body.get("name")
-    return dispatch(pms, function, body.get("args") or {})
+        config, pms = tenant
+        # Function identity, most reliable first: the URL path (/webhook/<fn>), then the body. Retell's
+        # test dialog overwrites the body's name with "test_tool", so the path is what makes it routable;
+        # in our own curls/envelope it comes from "function"/"name".
+        function = path_function or body.get("function") or body.get("name")
+        return dispatch(pms, function, body.get("args") or {})
+    except Exception as e:
+        traceback.print_exc()
+        return {"status": "error", "message": f"server error: {type(e).__name__}: {e}"}
 
 
 @app.post("/webhook")
