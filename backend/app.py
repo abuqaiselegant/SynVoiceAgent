@@ -52,8 +52,7 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/webhook")
-async def webhook(request: Request):
+async def _handle(request: Request, path_function=None):
     # Reject anyone who doesn't present the shared secret (when one is configured).
     if WEBHOOK_SECRET:
         provided = request.headers.get("x-webhook-secret", "")
@@ -71,10 +70,21 @@ async def webhook(request: Request):
                 "message": f"unknown practice for number {to_number}"}
 
     config, pms = tenant
-    # Retell's native custom-function payload names the function "name"; our own envelope uses
-    # "function". Accept either so both the agent and the test curls work.
-    function = body.get("function") or body.get("name")
+    # Function identity, most reliable first: the URL path (/webhook/<fn>), then the body. Retell's
+    # test dialog overwrites the body's name with "test_tool", so the path is what makes it routable;
+    # in our own curls/envelope it comes from "function"/"name".
+    function = path_function or body.get("function") or body.get("name")
     return dispatch(pms, function, body.get("args") or {})
+
+
+@app.post("/webhook")
+async def webhook(request: Request):
+    return await _handle(request)
+
+
+@app.post("/webhook/{function}")
+async def webhook_named(function: str, request: Request):
+    return await _handle(request, path_function=function)
 
 
 # Pinned to 8080 so we never collide with the AskMyDocs app on 8000.

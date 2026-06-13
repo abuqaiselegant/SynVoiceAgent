@@ -23,3 +23,6 @@ PROJECT_PLAN.md
 
 # Handoff doc holds a live secret — keep local only
 HANDOFF-B-webhook.md
+
+# Testing guide references the live URL + secret — keep local only
+TESTING.md

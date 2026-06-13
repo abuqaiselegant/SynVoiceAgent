@@ -8,8 +8,9 @@ the PMS layer. Keeping them pure (no FastAPI in here) makes them easy to test wi
 
 # "What times are free?" -> a short list of slots.
 def handle_check_availability(pms, args):
+    # The agent sends "" (not null) for an optional practitioner with no preference; treat as "any".
     slots = pms.get_available_slots(
-        args["treatment_key"], args.get("practitioner_id"),
+        args["treatment_key"], args.get("practitioner_id") or None,
         args["date_from"], args["date_to"])
     if not slots:
         return {"status": "no_slots", "slots": []}
@@ -52,8 +53,9 @@ def handle_cancel_appointment(pms, args):
 
 # "Move it to another time." -> reschedule (PMS does cancel + rebook).
 def handle_reschedule_appointment(pms, args):
+    # "" = no new practitioner preference -> keep the existing one (treat as None, not a real id).
     result = pms.reschedule_appointment(args["appointment_id"], args["new_start"],
-                                        args.get("practitioner_id"))
+                                        args.get("practitioner_id") or None)
     if result["status"] == "rescheduled":
         return {"status": "rescheduled", "appointment_id": result["appointment"]["id"],
                 "message": "Done, that's moved."}
