@@ -30,6 +30,21 @@ WEBHOOK_SECRET = os.environ.get("WEBHOOK_SECRET")
 if not WEBHOOK_SECRET:
     print("WARNING: WEBHOOK_SECRET not set — /webhook is UNAUTHENTICATED (local dev only).")
 
+# Which practice a call is for is keyed off the dialled number. Depending on how the Retell function
+# request body is templated, that number arrives top-level or nested under "call"/"args". Read all
+# of those, and fall back to the test practice so dev calls aren't blocked when Retell omits it.
+# Override the fallback (or disable it — set to empty) per environment via DEFAULT_TO_NUMBER.
+DEFAULT_TO_NUMBER = os.environ.get("DEFAULT_TO_NUMBER", "+441162345678")
+
+
+def _extract_to_number(body):
+    return (
+        body.get("to_number")
+        or (body.get("call") or {}).get("to_number")
+        or (body.get("args") or {}).get("to_number")
+        or DEFAULT_TO_NUMBER
+    )
+
 
 @app.get("/health")
 def health():
@@ -49,13 +64,17 @@ async def webhook(request: Request):
     body = await request.json()
 
     # Which practice is this call for? Identified by the number that was dialled.
-    tenant = get_tenant(body.get("to_number"))
+    to_number = _extract_to_number(body)
+    tenant = get_tenant(to_number)
     if tenant is None:
         return {"status": "error",
-                "message": f"unknown practice for number {body.get('to_number')}"}
+                "message": f"unknown practice for number {to_number}"}
 
     config, pms = tenant
-    return dispatch(pms, body.get("function"), body.get("args") or {})
+    # Retell's native custom-function payload names the function "name"; our own envelope uses
+    # "function". Accept either so both the agent and the test curls work.
+    function = body.get("function") or body.get("name")
+    return dispatch(pms, function, body.get("args") or {})
 
 
 # Pinned to 8080 so we never collide with the AskMyDocs app on 8000.
