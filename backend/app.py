@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from tenants import get_tenant      # noqa: E402
 from handlers import dispatch       # noqa: E402
+from db import store                # noqa: E402
 
 app = FastAPI(title="Synkris Voice Agent — webhook")
 
@@ -45,6 +46,14 @@ def _extract_to_number(body):
         or (body.get("args") or {}).get("to_number")
         or DEFAULT_TO_NUMBER
     )
+
+
+def _extract_call_id(body):
+    return body.get("call_id") or (body.get("call") or {}).get("call_id")
+
+
+def _extract_from_number(body):
+    return body.get("from_number") or (body.get("call") or {}).get("from_number")
 
 
 @app.get("/health")
@@ -78,10 +87,26 @@ async def _handle(request: Request, path_function=None):
         # test dialog overwrites the body's name with "test_tool", so the path is what makes it routable;
         # in our own curls/envelope it comes from "function"/"name".
         function = path_function or body.get("function") or body.get("name")
-        return dispatch(pms, function, body.get("args") or {})
+        result = dispatch(pms, function, body.get("args") or {})
+        _log_call(config, body, function, result)
+        return result
     except Exception:
         traceback.print_exc()   # full detail in the server logs, not in the response
         return {"status": "error", "message": "Sorry, something went wrong on our side."}
+
+
+def _log_call(config, body, function, result):
+    """Best-effort call log (one row per call_id). Never let logging break the response."""
+    call_id = _extract_call_id(body)
+    if not store.configured() or not call_id:
+        return
+    try:
+        store.log_call(config["tenant_id"], call_id,
+                       _extract_from_number(body), _extract_to_number(body),
+                       intent=function or "unknown",
+                       outcome=(result or {}).get("status", "unknown"))
+    except Exception:
+        traceback.print_exc()
 
 
 @app.post("/webhook")

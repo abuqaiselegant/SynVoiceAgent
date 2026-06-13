@@ -94,3 +94,20 @@ def list_upcoming_bookings(tenant_id: str, customer_id: str, now_iso: str):
          .eq("status", "booked").gte("starts_at", now_iso)
          .order("starts_at").execute())
     return r.data
+
+
+# ---- call logs (one row per phone call, keyed by Retell's call id) -------------------------------
+def log_call(tenant_id: str, retell_call_id: str, from_number: str, to_number: str,
+             intent: str, outcome: str):
+    """Record (or update) the call's latest function + outcome. A call makes several function calls;
+    we keep one row per call_id, updated each time, so the row reflects how the call ended."""
+    fields = {"from_number": from_number, "to_number": to_number,
+              "intent": intent, "outcome": outcome}
+    existing = (client().table("call_logs").select("id")
+                .eq("tenant_id", tenant_id).eq("retell_call_id", retell_call_id)
+                .limit(1).execute())
+    if existing.data:
+        client().table("call_logs").update(fields).eq("id", existing.data[0]["id"]).execute()
+    else:
+        client().table("call_logs").insert(
+            {"tenant_id": tenant_id, "retell_call_id": retell_call_id, **fields}).execute()
