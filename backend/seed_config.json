@@ -26,6 +26,7 @@
       "id": "dentally_practitioner_101",
       "name": "Dr. Jane Smith",
       "role": "Dentist",
+      "calendar_id": "aede531a088b6b081734259a215af29dd1606717038fbdb8b63aa47f148490ec@group.calendar.google.com",
       "treatment_keys": ["exam", "scale_polish", "filling", "emergency"],
       "working_hours": {
         "monday":    { "open": "09:00", "close": "17:00", "breaks": [ { "start": "13:00", "end": "14:00" } ] },

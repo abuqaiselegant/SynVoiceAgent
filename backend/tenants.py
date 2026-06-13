@@ -10,6 +10,7 @@ import json
 import os
 
 from pms.mock import MockPMS
+from pms.gcal import GoogleCalendarPMS
 from db import store
 
 # Self-contained seed lives next to this file (mirrors contracts/contract-1-example.json).
@@ -22,6 +23,8 @@ TENANTS = {}
 def _make_pms(config, pms_name):
     if pms_name == "mock":
         return MockPMS(config)   # MockPMS uses the real clock here
+    if pms_name == "gcal":
+        return GoogleCalendarPMS(config)
     raise ValueError(f"PMS '{pms_name}' is not implemented yet")
 
 
