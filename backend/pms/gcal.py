@@ -125,7 +125,9 @@ class GoogleCalendarPMS(PMS):
                        dob=str(c["dob"]), phone=c.get("phone") or "", upcoming=[])
 
     def get_available_slots(self, treatment_key: str, practitioner_id: Optional[str],
-                            date_from: str, date_to: str) -> List[Slot]:
+                            date_from: str, date_to: str,
+                            time_from: Optional[str] = None,
+                            time_to: Optional[str] = None) -> List[Slot]:
         # Only practitioners with a shared calendar are bookable; restrict the config we hand the
         # slot engine to those, so it never offers a practitioner we can't actually book.
         cal_practitioners = [p for p in self.config["practitioners"] if p.get("calendar_id")]
@@ -146,7 +148,8 @@ class GoogleCalendarPMS(PMS):
 
         cfg = {**self.config, "practitioners": cal_practitioners}
         return compute_free_slots(cfg, treatment_key, practitioner_id,
-                                  date_from, date_to, booked, now=self.now)
+                                  date_from, date_to, booked, now=self.now,
+                                  time_from=time_from, time_to=time_to)
 
     def create_appointment(self, patient_id: str, treatment_key: str,
                            practitioner_id: str, start: str) -> dict:

@@ -11,7 +11,8 @@ def handle_check_availability(pms, args):
     # The agent sends "" (not null) for an optional practitioner with no preference; treat as "any".
     slots = pms.get_available_slots(
         args["treatment_key"], args.get("practitioner_id") or None,
-        args["date_from"], args["date_to"])
+        args["date_from"], args["date_to"],
+        time_from=args.get("time_from") or None, time_to=args.get("time_to") or None)
     if not slots:
         return {"status": "no_slots", "slots": []}
     return {"status": "ok", "slots": [s.to_dict() for s in slots]}

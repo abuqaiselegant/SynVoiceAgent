@@ -73,10 +73,13 @@ class MockPMS(PMS):
 
     # Ask the slot engine for free times, given everything currently booked.
     def get_available_slots(self, treatment_key: str, practitioner_id: Optional[str],
-                            date_from: str, date_to: str) -> List[Slot]:
+                            date_from: str, date_to: str,
+                            time_from: Optional[str] = None,
+                            time_to: Optional[str] = None) -> List[Slot]:
         booked = [a.to_dict() for a in self._booked()]
         return compute_free_slots(self.config, treatment_key, practitioner_id,
-                                  date_from, date_to, booked, now=self.now)
+                                  date_from, date_to, booked, now=self.now,
+                                  time_from=time_from, time_to=time_to)
 
     # Book an appointment, guarding against two callers grabbing the same slot.
     def create_appointment(self, patient_id: str, treatment_key: str,

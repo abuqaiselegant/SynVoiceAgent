@@ -27,8 +27,15 @@ def _overlaps(a_start, a_end, b_start, b_end) -> bool:
 def compute_free_slots(config: dict, treatment_key: str, practitioner_id: Optional[str],
                        date_from: str, date_to: str, booked: List[dict],
                        now: Optional[datetime] = None,
-                       granularity_min: int = 15, limit: int = 6) -> List[Slot]:
+                       granularity_min: int = 15, limit: int = 6,
+                       time_from: Optional[str] = None,
+                       time_to: Optional[str] = None) -> List[Slot]:
     tz = ZoneInfo(config["practice"]["timezone"])
+
+    # Optional time-of-day window (e.g. caller wants the afternoon). A slot qualifies if its start is
+    # at/after time_from and before time_to. Applied before the limit, so afternoon slots aren't lost.
+    tod_from = _hhmm(time_from) if time_from else None
+    tod_to = _hhmm(time_to) if time_to else None
 
     treatment = next((t for t in config["treatment_types"] if t["key"] == treatment_key), None)
     if treatment is None:
@@ -76,7 +83,10 @@ def compute_free_slots(config: dict, treatment_key: str, practitioner_id: Option
             t = win_start
             while t + duration <= win_end:
                 s_start, s_end = t, t + duration
-                if (now is None or s_start >= now) and not any(
+                tod = s_start.time()
+                in_window = ((tod_from is None or tod >= tod_from)
+                             and (tod_to is None or tod < tod_to))
+                if in_window and (now is None or s_start >= now) and not any(
                         _overlaps(s_start, s_end, bs, be) for bs, be in busy):
                     slots.append(Slot(start=s_start.isoformat(),
                                       practitioner_id=p["id"],

@@ -18,8 +18,11 @@ class PMS(ABC):
 
     @abstractmethod
     def get_available_slots(self, treatment_key: str, practitioner_id: Optional[str],
-                            date_from: str, date_to: str) -> List[Slot]:
-        """Free slots for the treatment in the date range. practitioner_id None = any."""
+                            date_from: str, date_to: str,
+                            time_from: Optional[str] = None,
+                            time_to: Optional[str] = None) -> List[Slot]:
+        """Free slots for the treatment in the date range. practitioner_id None = any.
+        time_from/time_to ("HH:MM") optionally narrow to a part of the day (e.g. afternoon)."""
 
     @abstractmethod
     def create_appointment(self, patient_id: str, treatment_key: str,
