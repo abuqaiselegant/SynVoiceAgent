@@ -111,3 +111,29 @@ def log_call(tenant_id: str, retell_call_id: str, from_number: str, to_number: s
     else:
         client().table("call_logs").insert(
             {"tenant_id": tenant_id, "retell_call_id": retell_call_id, **fields}).execute()
+
+
+def enrich_call_log(retell_call_id: str, transcript=None, recording_url=None,
+                    started_at=None, ended_at=None, from_number=None, to_number=None):
+    """Fill end-of-call detail (transcript/recording/timestamps) on the call's row. Updates the row
+    created during the call by log_call; if none exists (e.g. an FAQ-only call that never hit a
+    function), create one by resolving the tenant from the dialled number."""
+    fields = {k: v for k, v in {
+        "transcript": transcript, "recording_url": recording_url,
+        "started_at": started_at, "ended_at": ended_at,
+        "from_number": from_number, "to_number": to_number}.items() if v is not None}
+    if not fields:
+        return "empty"
+    existing = (client().table("call_logs").select("id")
+                .eq("retell_call_id", retell_call_id).limit(1).execute())
+    if existing.data:
+        client().table("call_logs").update(fields).eq("id", existing.data[0]["id"]).execute()
+        return "updated"
+    if to_number:
+        t = fetch_tenant(to_number)
+        if t:
+            client().table("call_logs").insert(
+                {"tenant_id": t["config"]["tenant_id"], "retell_call_id": retell_call_id,
+                 **fields}).execute()
+            return "created"
+    return "skipped"

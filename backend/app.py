@@ -13,6 +13,7 @@ import hmac
 import os
 import sys
 import traceback
+from datetime import datetime, timezone
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -54,6 +55,11 @@ def _extract_call_id(body):
 
 def _extract_from_number(body):
     return body.get("from_number") or (body.get("call") or {}).get("from_number")
+
+
+def _ms_iso(ms):
+    """Retell sends start/end as epoch milliseconds; our columns are timestamptz."""
+    return datetime.fromtimestamp(ms / 1000, tz=timezone.utc).isoformat() if ms else None
 
 
 @app.get("/health")
@@ -112,6 +118,33 @@ def _log_call(config, body, function, result):
 @app.post("/webhook")
 async def webhook(request: Request):
     return await _handle(request)
+
+
+# Retell's agent-level webhook (call_started / call_ended / call_analyzed). Defined BEFORE the
+# /webhook/{function} catch-all so it isn't swallowed by it. Retell's agent webhook can't send our
+# custom header, so the shared secret rides in the URL as ?token=<secret>.
+@app.post("/webhook/call-event")
+async def call_event(request: Request):
+    if WEBHOOK_SECRET and request.query_params.get("token") != WEBHOOK_SECRET:
+        return JSONResponse(status_code=401,
+                            content={"status": "error", "message": "unauthorized"})
+    body = await request.json()
+    call = body.get("call") or body          # the webhook wraps the call object under "call"
+    call_id = call.get("call_id")
+    if not call_id or not store.configured():
+        return {"status": "ignored"}
+    try:
+        store.enrich_call_log(
+            call_id,
+            transcript=call.get("transcript"),
+            recording_url=call.get("recording_url"),
+            started_at=_ms_iso(call.get("start_timestamp")),
+            ended_at=_ms_iso(call.get("end_timestamp")),
+            from_number=call.get("from_number"),
+            to_number=call.get("to_number"))
+    except Exception:
+        traceback.print_exc()
+    return {"status": "ok"}
 
 
 @app.post("/webhook/{function}")
