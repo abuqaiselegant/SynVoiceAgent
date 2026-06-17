@@ -78,13 +78,20 @@ async def _handle(request: Request, path_function=None):
 
     body = await request.json()
 
-    # Which practice is this call for? Identified by the number that was dialled.
+    # Which practice is this call for? The practice's own number is the dialled (to) number on an
+    # inbound call, but the caller (from) number on an outbound one. Resolve from the dialled end
+    # first, then fall back to the other end, so routing works in both directions.
     to_number = _extract_to_number(body)
+    from_number = _extract_from_number(body)
     # Resolving the tenant builds its PMS (which may reach Supabase / Google). Never let a misconfig
     # 500 the whole endpoint — return a clean error the agent can fall back on.
     try:
-        tenant = get_tenant(to_number)
+        tenant = get_tenant(to_number) or (get_tenant(from_number) if from_number else None)
         if tenant is None:
+            # Neither end is registered to a practice. This is the usual cause of a call where every
+            # function "can't reach the system" — log it so it isn't read as an outage.
+            print(f"WARNING: no tenant for call to={to_number!r} from={from_number!r} "
+                  f"— register the practice number in `tenants`.")
             return {"status": "error",
                     "message": f"unknown practice for number {to_number}"}
 

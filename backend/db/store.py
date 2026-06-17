@@ -8,6 +8,7 @@ the bundled seed_config.json instead of calling this module — see tenants.py.
 """
 
 import os
+import re
 from functools import lru_cache
 
 from supabase import Client, create_client
@@ -18,6 +19,15 @@ def configured() -> bool:
     return bool(os.environ.get("SUPABASE_URL") and os.environ.get("SUPABASE_SERVICE_ROLE_KEY"))
 
 
+def normalize_phone(number: str) -> str:
+    """Canonical form for matching a dialled number: a leading + (if any) plus digits, nothing else.
+    So '+44 786 213 0625' and '+447862130625' both match. Tenant lookup is an exact string compare,
+    so the stored key (on write) and the dialled number (on read) must normalise the same way."""
+    if not number:
+        return number
+    return re.sub(r"[^\d+]", "", number)
+
+
 @lru_cache(maxsize=1)
 def client() -> Client:
     return create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])
@@ -26,7 +36,7 @@ def client() -> Client:
 def fetch_tenant(phone_number: str):
     """The tenant row ({config, pms}) for a dialled number, or None if we don't serve it."""
     r = (client().table("tenants")
-         .select("config, pms").eq("phone_number", phone_number).limit(1).execute())
+         .select("config, pms").eq("phone_number", normalize_phone(phone_number)).limit(1).execute())
     return r.data[0] if r.data else None
 
 
@@ -34,7 +44,7 @@ def upsert_tenant(config: dict, pms: str = "mock"):
     """Insert or update a practice's config row, keyed by the config's tenant_id."""
     row = {
         "id": config["tenant_id"],
-        "phone_number": config["practice"]["phone"],
+        "phone_number": normalize_phone(config["practice"]["phone"]),
         "name": config["practice"]["name"],
         "pms": pms,
         "config": config,
